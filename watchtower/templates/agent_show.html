@@ -1,0 +1,71 @@
+
+
+
+<div class="container-fuid bodystuff" style="margin-top: 15px">
+  <div class="d-flex align-items-center gap-3">
+
+  <span class="fw-bold">CCache Watcher</span>
+
+  <button
+    id="ccache-btn"
+    class="btn watcher-btn"
+    data-type="ccache"
+    data-uuid="{{ agent['uuid']}}">
+    Loading...
+  </button>
+
+  <span
+    id="ccache-spinner"
+    class="spinner-border spinner-border-sm text-primary d-none"
+    role="status">
+  </span>
+<span class="fw-bold">Keyring/KCM Watcher</span>
+
+  <button
+    id="keyring-btn"
+    class="btn watcher-btn"
+    data-type="keyring"
+    data-uuid="{{ agent['uuid'] }}">
+    Loading...
+  </button>
+
+  <span
+    id="keyring-spinner"
+    class="spinner-border spinner-border-sm text-primary d-none"
+    role="status">
+  </span>
+ 
+  <a href="/commands/{{ agent['uuid'] }}"
+  class="btn btn-sm btn-danger-hover">
+  Commands
+  </a>
+
+
+
+
+</div>
+
+   <table class="table table-striped table-hover" >
+  	<thead class="tadfdble-dark table-bordered border-dark">
+  		<tr>
+  			<th scope="col" style="width: 300px;"> Default Realm </th>
+  			<th scope="col"> SSSD Cache</th>
+  			<th scope="col"> CCache Format </th>
+			<th scope="col"> Domains </th>
+  		</tr>
+  	</thead>
+  	<tbody class="table-light">
+  		<tr>
+  			<th scope ="row">{{ agent["default_realm"] }}</th>
+  			<td>{{ agent["sssd_cache"] }}</td>
+			<td>{{ agent["ccache"] }} </td>
+			<td>{{ agent["domains"] }} </td>
+  		</tr>
+  	</tbody>
+  </table>
+</div>	
+
+
+	</body>
+</html>
+

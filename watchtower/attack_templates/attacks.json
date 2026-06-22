@@ -1,0 +1,81 @@
+{
+  "schema_version": "1.0",
+  "attacks": [
+    {
+      "attack": {
+        "name": "Test ticket from domain admin (SMB)",
+        "description": "Auth in remote host and list C$ share to verify if a domain ticket is valid.",
+        "command": "./attack_templates/test-ticket-SMB/test-ticket-SMB.py"
+      },
+      "args": [
+        {
+          "name": "-target-ip",
+          "type": "value",
+          "required": true,
+          "placeholder": "10.2.0.12",
+          "description": "Target IP"
+        },
+        {
+          "name": "-target-name",
+          "type": "value",
+          "required": true,
+          "placeholder": "test-windows-01.ludus.domain",
+          "description": "Target hostname"
+        },
+        {
+          "name": "-domain",
+          "type": "value",
+          "required": true,
+          "placeholder": "ludus.domain",
+          "description": "Target domain"
+        },
+        {
+          "name": "-dc-ip",
+          "type": "value",
+          "required": true,
+          "placeholder": "10.2.10.11",
+          "description": "Domain Controller IP"
+        }
+      ]
+    },
+ {
+      "attack": {
+        "name": "Test02 ticket from domain admin (SMB)",
+        "description": "Auth in remote host and list C$ share to verify if a domain ticket is valid.",
+        "command": "./test02-ticket-SMB/test-ticket-SMB.py"
+      },
+      "args": [
+        {
+          "name": "-target-ip",
+          "type": "value",
+          "required": true,
+          "placeholder": "10.2.0.12",
+          "description": "Target IP"
+        },
+        {
+          "name": "-target-name",
+          "type": "value",
+          "required": true,
+          "placeholder": "test-windows-01.ludus.domain",
+          "description": "Target hostname"
+        },
+        {
+          "name": "-domain",
+          "type": "value",
+          "required": true,
+          "placeholder": "ludus.domain",
+          "description": "Target domain"
+        },
+        {
+          "name": "-dc-ip",
+          "type": "value",
+          "required": true,
+          "placeholder": "10.2.10.11",
+          "description": "Domain Controller IP"
+        }
+      ]
+    }
+
+  ]
+}
+

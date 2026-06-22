@@ -1,0 +1,158 @@
+{% include "header.html" %}
+
+<div class="container py-4">
+    <h1 class="mb-4">Statistics Overview</h1>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Total Tickets</h5>
+		    <h2 class="fw-bold">{{ tickets["total_tickets"] }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Non Expired Tickets</h5>
+		    <h2 class="fw-bold">{{ tickets["total_tickets"] - tickets["expired_tickets"] }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Total users</h5>
+		    <h2 class="fw-bold">{{ tickets["total_users"] }}</h2>
+                </div>
+            </div>
+        </div>
+
+	<div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Total Hosts</h5>
+                    <h2 class="fw-bold">{{ tickets["total_hosts"] }}</h2>
+                </div>
+            </div>
+        </div>
+
+
+
+    </div>
+
+    <!-- Charts -->
+    <div class="row mt-5">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-center">User Activity</h5>
+                    <canvas id="usersPie"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-center">Tickets per hour</h5>
+                    <canvas id="hoursBar"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="bootstrap.bundle.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const usersData = {{ tickets.users | tojson }};
+    const usersLabels = usersData.map(u => u[0]);
+    const usersdata = usersData.map(u => u[1]);
+
+    
+    const userscolors = usersLabels.map(() =>
+        `hsl(${Math.random() * 360}, 70%, 60%)`
+    );
+
+    new Chart(document.getElementById('usersPie'), {
+        type: 'pie', 
+        data: {
+            labels: usersLabels,
+            datasets: [{
+                data: usersdata,
+                backgroundColor: userscolors
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => `${ctx.label}: ${ctx.raw}`
+                    }
+                }
+            }
+        }
+    });
+
+
+    const hoursData = {{ tickets.hours | tojson }};
+
+    const hoursLabels = Object.keys(hoursData).map(h =>
+        h.toString().padStart(2, '0')
+    );
+    const hoursdata = Object.values(hoursData);
+
+    // Generate random colors
+    const hourscolors = hoursLabels.map(() =>
+        `hsl(${Math.floor(Math.random() * 360)}, 70%, 60%)`
+    );
+
+    new Chart(document.getElementById('hoursBar'), {
+        type: 'bar',
+        data: {
+            labels: hoursLabels,
+            datasets: [{
+                label: 'Tickets per Hour',
+                data: hoursdata,
+                backgroundColor: hourscolors
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Hour of Day'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Tickets'
+                    },
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

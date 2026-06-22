@@ -1,0 +1,425 @@
+{% include "header.html" %}
+
+<style>
+  body {
+    padding-top: 90px;
+  }
+
+  .attack-row {
+    cursor: pointer;
+  }
+
+  .btn-danger-hover {
+    background-color: #000;
+    color: #fff;
+    border: 1px solid #000;
+  }
+
+  .btn-danger-hover:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+    color: #fff;
+  }
+</style>
+
+<div class="container-fluid">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-8 col-xl-7">
+
+      <!-- ATTACK TEMPLATES -->
+      <h3 class="mb-3">Attack Templates</h3>
+
+      <table class="table table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>Name</th>
+          </tr>
+        </thead>
+        <tbody>
+{% for item in attacks.attacks %}
+  <tr class="attack-row"
+      data-bs-toggle="offcanvas"
+      data-bs-target="#attackSidebar"
+      data-attack-name="{{ item.attack.name }}"
+      data-attack-description="{{ item.attack.description }}"
+      data-attack-command="{{ item.attack.command }}"
+      data-attack-args='{{ item.args | tojson | e }}'
+	>
+    <td><strong>{{ item.attack.name }}</strong></td>
+  </tr>
+  {% endfor %}
+
+        </tbody>
+      </table>
+
+      <!-- SCHEDULED ATTACKS -->
+      <h3 class="mt-5 mb-3">Scheduled Attacks</h3>
+
+      <table class="table table-striped align-middle">
+<thead class="table-light">
+  <tr>
+    <th>Command</th>
+    <th>User Condition</th>
+    <th>SPN Condition</th>
+    <th>Status</th>
+    <th>Creation</th>
+    <th>Execution</th>
+  </tr>
+</thead>        
+<tbody>
+  {% for attack in sc_attacks %}
+  <tr>
+
+    <!-- Command -->
+    <td>
+      <code class="text-primary"
+            role="button"
+            style="cursor: pointer;"
+            data-bs-toggle="modal"
+            data-bs-target="#attackDetailsModal"
+            data-command='{{ attack.payload | tojson | e }}'
+            data-output="{{ attack.output | e }}">
+
+        {{ attack.command }}
+      </code>
+    </td>
+
+    <!-- Username condition -->
+    <td>
+      <code>{{ attack.username_condition }}</code>
+    </td>
+
+    <!-- SPN condition -->
+    <td>
+      <code>{{ attack.spn_condition }}</code>
+    </td>
+
+    <!-- Status -->
+    <td>
+      {% if attack.status == 0 %}
+        <span class="badge bg-light text-dark">PENDING</span>
+      {% elif attack.status == 1 %}
+        <span class="badge bg-warning text-dark">LOADED</span>
+      {% elif attack.status == 2 %}
+        <span class="badge bg-success">EXECUTED</span>
+      {% endif %}
+    </td>
+
+    <!-- Creation -->
+    <td>{{ attack.t_in }}</td>
+
+    <!-- Execution -->
+    <td>
+      {% if attack.t_out %}
+        {{ attack.t_out }}
+      {% else %}
+        —
+      {% endif %}
+    </td>
+
+  </tr>
+  {% endfor %}
+</tbody>
+      </table>
+
+    </div>
+  </div>
+</div>
+
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="attackSidebar">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title">Attack Details</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+  </div>
+
+  <div class="offcanvas-body">
+    <h6 id="sidebarAttackName">Attack name</h6>
+    <p class="text-muted" id="sidebarAttackDescription">Attack description</p>
+
+    <hr>
+
+    <div class="d-grid gap-2">
+      <button class="btn btn-outline-secondary show-params-btn"
+              data-bs-toggle="modal"
+              data-bs-target="#parametersModal">
+        Show Parameters
+      </button>
+    </div>
+
+    <hr>
+
+    <button class="btn btn-danger-hover w-100 schedule-btn"
+        data-bs-toggle="modal"
+        data-bs-target="#scheduleModal">
+  Schedule Execution
+</button>
+  </div>
+</div>
+
+<div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="scheduleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="scheduleModalLabel">Schedule Attack</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <form id="scheduleForm">
+          <div id="scheduleArgsContainer"></div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button type="submit" form="scheduleForm" class="btn btn-primary">Schedule</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+
+<div class="modal fade" id="parametersModal" tabindex="-1" aria-labelledby="parametersModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="parametersModalLabel">Attack Parameters</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <p><strong>Command:</strong> <span id="modalCommand"></span></p>
+        <h6>Arguments:</h6>
+        <ul id="modalArgs"></ul>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="attackDetailsModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Attack Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <h6>Command</h6>
+        <pre class="modal-command text-primary"></pre>
+
+        <h6 class="mt-3">Parameters</h6>
+        <table class="table table-bordered modal-parameters">
+          <thead>
+            <tr><th>Argument</th><th>Value</th></tr>
+          </thead>
+          <tbody>
+            <!-- Filled dynamically -->
+          </tbody>
+        </table>
+
+        <h6 class="mt-3">Output</h6>
+        <pre class="modal-output bg-light p-2"></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("show.bs.offcanvas", function (event) {
+  const trigger = event.relatedTarget;
+  if (!trigger) return;
+
+  document.getElementById("sidebarAttackName").textContent =
+    trigger.getAttribute("data-attack-name");
+
+  document.getElementById("sidebarAttackDescription").textContent =
+    trigger.getAttribute("data-attack-description");
+});
+</script>
+
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Offcanvas elements
+  const sidebarName = document.getElementById('sidebarAttackName');
+  const sidebarDesc = document.getElementById('sidebarAttackDescription');
+
+  // Buttons
+  const showParamsBtn = document.querySelector('.show-params-btn');
+  const scheduleBtn = document.querySelector('.schedule-btn');
+
+  // Table rows
+  document.querySelectorAll('.attack-row').forEach(row => {
+    row.addEventListener('click', () => {
+      // Fill offcanvas header fields
+      sidebarName.textContent = row.dataset.attackName;
+      sidebarDesc.textContent = row.dataset.attackDescription;
+
+      // Fill the buttons with the attack's command & args
+      showParamsBtn.dataset.command = row.dataset.attackCommand;
+      showParamsBtn.dataset.args = row.dataset.attackArgs;
+
+      scheduleBtn.dataset.command = row.dataset.attackCommand;
+      scheduleBtn.dataset.args = row.dataset.attackArgs;
+    });
+  });
+});
+
+  // Modal for parameters
+  const paramsModal = document.getElementById('parametersModal');
+  paramsModal.addEventListener('show.bs.modal', event => {
+    const showParamsBtn = document.querySelector('.show-params-btn');
+    const command = showParamsBtn.dataset.command;
+    const args = JSON.parse(showParamsBtn.dataset.args);
+
+    document.getElementById('modalCommand').textContent = command;
+
+    const argsList = document.getElementById('modalArgs');
+    argsList.innerHTML = '';
+    args.forEach(arg => {
+      const li = document.createElement('li');
+      li.textContent = `${arg.name} (${arg.description})`;
+      argsList.appendChild(li);
+    });
+  });
+
+  
+  const scheduleModal = document.getElementById('scheduleModal');
+  scheduleModal.addEventListener('show.bs.modal', event => {
+    const attackArgs = JSON.parse(document.querySelector('.schedule-btn').dataset.args);
+
+    const container = document.getElementById('scheduleArgsContainer');
+    container.innerHTML = '';
+
+    
+    const mandatoryFields = [
+      { name: 'Username Condition', placeholder: '*admin*', required: true },
+      { name: 'SPN Condition', placeholder: 'CIFS/*', required: true }
+    ];
+
+    mandatoryFields.forEach(field => {
+      const div = document.createElement('div');
+      div.className = 'mb-3';
+
+      const label = document.createElement('label');
+      label.className = 'form-label';
+      label.textContent = field.name + ' *';
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'form-control';
+      input.name = field.name.replace(/\s+/g, '_').toLowerCase(); // e.g., username_condition
+      input.placeholder = field.placeholder;
+      input.required = true;
+
+      div.appendChild(label);
+      div.appendChild(input);
+      container.appendChild(div);
+    });
+
+    
+    attackArgs.forEach(arg => {
+      const div = document.createElement('div');
+      div.className = 'mb-3';
+
+      const label = document.createElement('label');
+      label.className = 'form-label';
+      label.textContent = arg.name + (arg.required ? ' *' : '');
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'form-control';
+      input.name = arg.name.replace(/^-+/, '');
+      input.placeholder = arg.placeholder || '';
+      if (arg.required) input.required = true;
+
+      div.appendChild(label);
+      div.appendChild(input);
+      container.appendChild(div);
+    });
+  });
+
+
+
+document.getElementById('scheduleForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  const raw = Object.fromEntries(formData.entries());
+
+  const username_condition = raw.username_condition;
+  const spn_condition = raw.spn_condition;
+  delete raw.username_condition;
+  delete raw.spn_condition;
+
+  const scheduleBtn = document.querySelector('.schedule-btn');
+  const command = scheduleBtn.dataset.command;
+  const args = JSON.parse(scheduleBtn.dataset.args || '{}');
+
+  const payload = {
+    username_condition,
+    spn_condition,
+    command,
+    args: {...raw}
+  };
+
+  console.log('Scheduled attack with values:', payload);
+
+  // Hide the modal after submitting
+  const scheduleModalEl = document.getElementById('scheduleModal');
+  const scheduleModal = bootstrap.Modal.getInstance(scheduleModalEl) || new bootstrap.Modal(scheduleModalEl);
+  scheduleModal.hide();
+
+  
+   await fetch('/register-attack', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+   
+  scheduleModal.hide();
+
+  // Reload page after request
+  location.reload();
+});
+
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Select all code elements that should open the modal
+  document.querySelectorAll('code[data-bs-toggle="modal"]').forEach(codeEl => {
+    codeEl.addEventListener('click', () => {
+      const modalEl = document.getElementById('attackDetailsModal');
+      
+      // Read data attributes
+      const payload = JSON.parse(codeEl.dataset.command);  // your payload JSON
+      const output = codeEl.dataset.output;                // output text
+
+      // Fill modal content
+      modalEl.querySelector('.modal-command').textContent = payload.command || '';
+      
+      // Parameters table inside modal
+      const paramsContainer = modalEl.querySelector('.modal-parameters');
+      paramsContainer.innerHTML = '';  // clear previous
+      for (const [arg, value] of Object.entries(payload.args || {})) {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${arg}</td><td>${value}</td>`;
+        paramsContainer.appendChild(row);
+      }
+
+      // Output
+      modalEl.querySelector('.modal-output').textContent = output || '';
+    });
+  });
+});
+</script>
+
+

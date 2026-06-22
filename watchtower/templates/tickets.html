@@ -1,0 +1,101 @@
+
+{% include "header.html" %}
+<script>
+function downloadTicket(uuid_ticket, file_format) {
+ window.location.href = `/download/ticket/${uuid_ticket}/${file_format}`;
+}
+</script>
+	
+<div class="container-fuid bodystuff">
+  <table class="table table-striped table-hover">
+  	<thead class="tadfdble-dark table-bordered border-dark">
+  		<tr>
+  			<th scope="col"> Host </th>
+  			<th scope="col"> User name </th>
+  			<th scope="col"> User realm </th>
+  			<th scope="col"> SPN </th>
+  			<th scope="col"> Service realm </th>
+  			<th scope="col"> Start Time </th>
+  			<th scope="col"> End Time </th>
+  			<th scope="col"> Lifetime </th>
+  			<th scope="col"> Status </th>
+  		</tr>
+  	</thead>
+  	<tbody class="table-light">
+  		{% for ticket in tickets %}
+  		<tr class="ticket-row" data-id="{{ ticket['id'] }}">
+  			<th scope ="row">{{ ticket["host"] }}</th>
+  			<td>{{ ticket["user_name"] }}</td>
+  			<td>{{ ticket["user_realm"] }}</td>
+  			<td>{{ ticket["spn"] }}</td>
+  			<td>{{ ticket["service_realm"] }}</td>
+  			<td>{{ ticket["start_time_format"] }}</td>
+  			<td>{{ ticket["end_time_format"] }}</td>
+  			<td>{{ ticket["life_time_format"] }}</td>
+  			<td>{{ ticket["status"] }}</td>
+  		</tr>
+  		{% endfor %}
+  	</tbody>
+  </table>
+</div>	
+
+
+<!-- Modal -->
+<div class="modal fade" id="ticketModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl" style="max-width: 90vw; margin-top: 10vh;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Ticket</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-0" id="ticketModalBody">
+        Loading...
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Add click handler to each row
+    document.querySelectorAll(".ticket-row").forEach(row => {
+        row.addEventListener("click", function() {
+            const id = this.dataset.id;
+
+            // Load the popup contents via AJAX
+            fetch(`/ticket/info/${id}`)
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById("ticketModalBody").innerHTML = html;
+
+                    // Show Bootstrap modal
+                    const modal = new bootstrap.Modal(document.getElementById("ticketModal"));
+                    modal.show();
+                })
+                .catch(err => {
+                    document.getElementById("ticketModalBody").innerHTML =
+                        "<p class='text-danger'>Error loading ticket details.</p>";
+                });
+        });
+    });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    const REFRESH_INTERVAL_MS = 15000; // 15 seconds
+    const modalEl = document.getElementById("ticketModal");
+
+    setInterval(() => {
+        // If modal exists AND is currently open, do NOT refresh
+        if (modalEl && modalEl.classList.contains("show")) {
+            return;
+        }
+
+        // Otherwise, refresh the page
+        window.location.reload();
+    }, REFRESH_INTERVAL_MS);
+});
+</script>
+
+
+	</body>
+</html>

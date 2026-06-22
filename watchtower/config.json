@@ -1,0 +1,9 @@
+{
+	"database" : "ts.db",
+	"host" : "0.0.0.0",
+	"port" : 5000,
+	"tunnel_shellcode" : "/tmp/minorthreat.so",
+	"web_username" : "X-C3LL",
+	"web_password" : "Fugazi_BadBrains"
+
+}
